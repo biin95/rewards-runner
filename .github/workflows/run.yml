@@ -32,8 +32,7 @@ jobs:
         run: |
           if [ ! -d sessions ] && [ -n "${{ secrets.SESSIONS_B64 }}" ]; then
             echo "${{ secrets.SESSIONS_B64 }}" | base64 -d | tar xzf -
-            echo "sessions restored from secret:"
-            ls -la sessions
+            echo "sessions restored (file count: $(ls sessions 2>/dev/null | wc -l))"
           else
             echo "no secret session to restore (dir exists: $( [ -d sessions ] && echo yes || echo no ))"
           fi
@@ -45,6 +44,12 @@ jobs:
 
       - name: Write .env from secret
         run: echo "${{ secrets.ENV_FILE_B64 }}" | base64 -d > .env
+
+      - name: Mask account identifiers in logs
+        run: |
+          grep -oiE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+' .env 2>/dev/null | sort -u | while read -r e; do
+            [ -n "$e" ] && echo "::add-mask::$e"
+          done
 
       - name: Run script
         run: npm start
