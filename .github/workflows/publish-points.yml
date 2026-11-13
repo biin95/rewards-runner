@@ -35,12 +35,21 @@ jobs:
               return m[-1] if m else None
           bj = datetime.timezone(datetime.timedelta(hours=8))
           now_bj = datetime.datetime.now(bj)
+          bal_cur = grab(r'currentBalance=(\d+)')
+          bal_prev = grab(r'previousBalance=(\d+)')
+          pg = re.findall(r'\[(?:ACCOUNT-END|RUN-END)\][^\n]*?pointsGained=(\d+)', log)
+          gained = pg[-1] if pg else None
+          if gained is None and bal_cur and bal_prev:
+              try:
+                  gained = str(int(bal_cur) - int(bal_prev))
+              except Exception:
+                  gained = None
           data = {
               "date": now_bj.strftime('%F'),
               "checked_at": now_bj.strftime('%m-%d %H:%M'),
               "local_time": now_bj.strftime('%m-%d %H:%M'),
-              "balance": grab(r'currentBalance=(\d+)'),
-              "gained": grab(r'pointsGained=(\d+)'),
+              "balance": bal_cur,
+              "gained": gained,
               "tasks_done": grab(r'activities:\s*(\d+) completed'),
               "tasks_total": None,
               "runtime_min": grab(r'runtimeMinutes=([\d.]+)'),
