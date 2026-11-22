@@ -1,12 +1,6 @@
 name: Run Microsoft Rewards Script
 
 on:
-  schedule:
-    # UTC 08:45 = 北京时间 16:45（微软积分日切点 PT 00:00 = UTC 08:00 之后）
-    # 双 cron 冗余：GitHub 对低活跃 fork 的 schedule 会延迟甚至丢弃，第二条兜底。
-    # 重复运行无害：已完成任务会被脚本跳过，第二次运行主要补漏。
-    - cron: '45 8 * * *'
-    - cron: '45 9 * * *'
   workflow_dispatch:
 
 jobs:
